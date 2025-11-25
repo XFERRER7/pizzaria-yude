@@ -1,5 +1,12 @@
 import { usePizzaria } from '../contexts/PizzariaContext';
-import { Pizza, ShoppingCart, DollarSign, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Pizza, ShoppingCart, DollarSign, TrendingUp, AlertTriangle, LucideIcon } from 'lucide-react';
+
+interface StatCard {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  color: string;
+}
 
 const Dashboard = () => {
   const { pizzas, pedidos, estoque } = usePizzaria();
@@ -13,7 +20,7 @@ const Dashboard = () => {
   
   const itensEstoqueBaixo = estoque.filter(item => item.quantidade <= item.minimo);
 
-  const cards = [
+  const cards: StatCard[] = [
     {
       title: 'Total de Pizzas',
       value: pizzas.length,

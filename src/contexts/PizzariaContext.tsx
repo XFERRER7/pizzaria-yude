@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { Pizza, Pedido, ItemEstoque, PizzariaContextType } from '../types';
 
-const PizzariaContext = createContext();
+const PizzariaContext = createContext<PizzariaContextType | undefined>(undefined);
 
 export const usePizzaria = () => {
   const context = useContext(PizzariaContext);
@@ -11,14 +11,18 @@ export const usePizzaria = () => {
   return context;
 };
 
-export const PizzariaProvider = ({ children }) => {
-  const [pizzas, setPizzas] = useState([]);
-  const [pedidos, setPedidos] = useState([]);
-  const [estoque, setEstoque] = useState([]);
+interface PizzariaProviderProps {
+  children: ReactNode;
+}
+
+export const PizzariaProvider = ({ children }: PizzariaProviderProps) => {
+  const [pizzas, setPizzas] = useState<Pizza[]>([]);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [estoque, setEstoque] = useState<ItemEstoque[]>([]);
   const [carregandoPizzas, setCarregandoPizzas] = useState(true);
 
   // Buscar pizzas do servidor
-  const buscarPizzasServidor = async () => {
+  const buscarPizzasServidor = async (): Promise<Pizza[]> => {
     try {
       const response = await fetch('http://localhost:3000/api/pizzas');
       const dados = await response.json();
@@ -46,7 +50,7 @@ export const PizzariaProvider = ({ children }) => {
 
       // Mesclar: servidor + local (evitar duplicatas por ID)
       const idsServidor = pizzasServidor.map(p => p.id);
-      const pizzasLocalFiltradas = pizzasLocal.filter(p => !idsServidor.includes(p.id));
+      const pizzasLocalFiltradas = pizzasLocal.filter((p: { id: number; }) => !idsServidor.includes(p.id));
       const pizzasMescladas = [...pizzasServidor, ...pizzasLocalFiltradas];
 
       setPizzas(pizzasMescladas);
@@ -61,7 +65,7 @@ export const PizzariaProvider = ({ children }) => {
         setEstoque(JSON.parse(estoqueSalvo));
       } else {
         // Estoque inicial
-        const estoqueInicial = [
+        const estoqueInicial: ItemEstoque[] = [
           { id: 1, nome: 'Mussarela', quantidade: 100, unidade: 'kg', minimo: 20 },
           { id: 2, nome: 'Tomate', quantidade: 50, unidade: 'kg', minimo: 10 },
           { id: 3, nome: 'Presunto', quantidade: 40, unidade: 'kg', minimo: 10 },
@@ -101,62 +105,62 @@ export const PizzariaProvider = ({ children }) => {
   }, [estoque]);
 
   // CRUD Pizzas
-  const adicionarPizza = (pizza) => {
-    const novaPizza = {
+  const adicionarPizza = useCallback((pizza: Omit<Pizza, 'id' | 'dataCriacao'>) => {
+    const novaPizza: Pizza = {
       ...pizza,
       id: Date.now(),
       dataCriacao: new Date().toISOString(),
     };
-    setPizzas([...pizzas, novaPizza]);
-  };
+    setPizzas(prev => [...prev, novaPizza]);
+  }, []);
 
-  const editarPizza = (id, pizzaAtualizada) => {
-    setPizzas(pizzas.map(p => p.id === id ? { ...pizzaAtualizada, id } : p));
-  };
+  const editarPizza = useCallback((id: number, pizzaAtualizada: Omit<Pizza, 'id'>) => {
+    setPizzas(prev => prev.map(p => p.id === id ? { ...pizzaAtualizada, id } as Pizza : p));
+  }, []);
 
-  const deletarPizza = (id) => {
-    setPizzas(pizzas.filter(p => p.id !== id));
-  };
+  const deletarPizza = useCallback((id: number) => {
+    setPizzas(prev => prev.filter(p => p.id !== id));
+  }, []);
 
   // CRUD Pedidos
-  const adicionarPedido = (pedido) => {
-    const novoPedido = {
+  const adicionarPedido = useCallback((pedido: Omit<Pedido, 'id' | 'data' | 'status'>) => {
+    const novoPedido: Pedido = {
       ...pedido,
       id: Date.now(),
       data: new Date().toISOString(),
       status: 'Pendente',
     };
-    setPedidos([...pedidos, novoPedido]);
-  };
+    setPedidos(prev => [...prev, novoPedido]);
+  }, []);
 
-  const editarPedido = (id, pedidoAtualizado) => {
-    setPedidos(pedidos.map(p => p.id === id ? { ...pedidoAtualizado, id } : p));
-  };
+  const editarPedido = useCallback((id: number, pedidoAtualizado: Omit<Pedido, 'id'>) => {
+    setPedidos(prev => prev.map(p => p.id === id ? { ...pedidoAtualizado, id } as Pedido : p));
+  }, []);
 
-  const deletarPedido = (id) => {
-    setPedidos(pedidos.filter(p => p.id !== id));
-  };
+  const deletarPedido = useCallback((id: number) => {
+    setPedidos(prev => prev.filter(p => p.id !== id));
+  }, []);
 
-  const atualizarStatusPedido = (id, novoStatus) => {
-    setPedidos(pedidos.map(p => 
+  const atualizarStatusPedido = useCallback((id: number, novoStatus: Pedido['status']) => {
+    setPedidos(prev => prev.map(p => 
       p.id === id ? { ...p, status: novoStatus } : p
     ));
-  };
+  }, []);
 
   // Estoque
-  const atualizarEstoque = (id, novaQuantidade) => {
-    setEstoque(estoque.map(item => 
+  const atualizarEstoque = useCallback((id: number, novaQuantidade: number) => {
+    setEstoque(prev => prev.map(item => 
       item.id === id ? { ...item, quantidade: novaQuantidade } : item
     ));
-  };
+  }, []);
 
-  const adicionarItemEstoque = (item) => {
-    const novoItem = {
+  const adicionarItemEstoque = useCallback((item: Omit<ItemEstoque, 'id'>) => {
+    const novoItem: ItemEstoque = {
       ...item,
       id: Date.now(),
     };
-    setEstoque([...estoque, novoItem]);
-  };
+    setEstoque(prev => [...prev, novoItem]);
+  }, []);
 
   const value = {
     pizzas,
@@ -179,8 +183,4 @@ export const PizzariaProvider = ({ children }) => {
       {children}
     </PizzariaContext.Provider>
   );
-};
-
-PizzariaProvider.propTypes = {
-  children: PropTypes.node.isRequired,
 };

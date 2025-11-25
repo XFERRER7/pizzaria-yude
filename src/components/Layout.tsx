@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { 
   Home, 
   Pizza, 
-  ShoppingCart, 
   Package, 
   TrendingUp, 
   BookOpen, 
-  Search,
   Menu,
-  X
+  X,
+  ShoppingCart,
+  Search
 } from 'lucide-react';
 
-const Layout = ({ children }) => {
+interface LayoutProps {
+  children: ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -21,11 +24,11 @@ const Layout = ({ children }) => {
     { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/pizzas', icon: Pizza, label: 'Pizzas' },
     { path: '/pedidos', icon: ShoppingCart, label: 'Pedidos' },
-    { path: '/cardapio', icon: BookOpen, label: 'Cardápio' },
+    // { path: '/cardapio', icon: BookOpen, label: 'Cardápio' },
     { path: '/estoque', icon: Package, label: 'Estoque' },
     { path: '/historico', icon: TrendingUp, label: 'Histórico' },
     { path: '/relatorio', icon: TrendingUp, label: 'Relatório' },
-    { path: '/busca', icon: Search, label: 'Busca' },
+    // { path: '/busca', icon: Search, label: 'Busca' },
   ];
 
   return (
@@ -96,10 +99,6 @@ const Layout = ({ children }) => {
       </main>
     </div>
   );
-};
-
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
 };
 
 export default Layout;

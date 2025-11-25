@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { usePizzaria } from '../contexts/PizzariaContext';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Pedido } from '../types';
 
 const Pedidos = () => {
   const { pedidos, pizzas, adicionarPedido, editarPedido, deletarPedido, atualizarStatusPedido } = usePizzaria();
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [pedidoEditando, setPedidoEditando] = useState(null);
+  const [pedidoEditando, setPedidoEditando] = useState<Pedido | null>(null);
   const [formData, setFormData] = useState({
     cliente: '',
     telefone: '',
@@ -27,7 +28,7 @@ const Pedidos = () => {
     setPedidoEditando(null);
   };
 
-  const abrirModal = (pedido = null) => {
+  const abrirModal = (pedido: Pedido | null = null) => {
     if (pedido) {
       setFormData({
         cliente: pedido.cliente,
@@ -49,19 +50,22 @@ const Pedidos = () => {
     resetForm();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const pizzaSelecionada = pizzas.find(p => p.nome === formData.pizza);
     const total = pizzaSelecionada ? pizzaSelecionada.preco * formData.quantidade : 0;
 
     const pedidoData = {
       ...formData,
-      quantidade: parseInt(formData.quantidade),
       total,
     };
 
     if (pedidoEditando) {
-      editarPedido(pedidoEditando.id, { ...pedidoData, status: pedidoEditando.status });
+      editarPedido(pedidoEditando.id, { 
+        ...pedidoData, 
+        status: pedidoEditando.status,
+        data: pedidoEditando.data 
+      });
     } else {
       adicionarPedido(pedidoData);
     }
@@ -69,17 +73,17 @@ const Pedidos = () => {
     fecharModal();
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     if (window.confirm('Tem certeza que deseja deletar este pedido?')) {
       deletarPedido(id);
     }
   };
 
-  const handleStatusChange = (id, novoStatus) => {
+  const handleStatusChange = (id: number, novoStatus: Pedido['status']) => {
     atualizarStatusPedido(id, novoStatus);
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: Pedido['status']) => {
     switch (status) {
       case 'Pendente':
         return 'bg-yellow-100 text-yellow-800';
@@ -167,7 +171,7 @@ const Pedidos = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={pedido.status}
-                        onChange={(e) => handleStatusChange(pedido.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(pedido.id, e.target.value as Pedido['status'])}
                         className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                           pedido.status
                         )}`}
@@ -205,9 +209,9 @@ const Pedidos = () => {
 
       {/* Modal */}
       {mostrarModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-6 border-b">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl  w-[30rem] my-8 max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b flex-shrink-0">
               <h2 className="text-2xl font-bold text-gray-800">
                 {pedidoEditando ? 'Editar Pedido' : 'Novo Pedido'}
               </h2>
@@ -218,8 +222,8 @@ const Pedidos = () => {
                 <X size={24} />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="p-6 space-y-4 overflow-y-auto flex-1">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     Nome do Cliente
@@ -282,7 +286,7 @@ const Pedidos = () => {
                     type="number"
                     min="1"
                     value={formData.quantidade}
-                    onChange={(e) => setFormData({ ...formData, quantidade: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, quantidade: Number(e.target.value) })}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                     required
                   />
@@ -297,11 +301,11 @@ const Pedidos = () => {
                       setFormData({ ...formData, observacoes: e.target.value })
                     }
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                    rows="3"
+                    rows={3}
                   />
                 </div>
               </div>
-              <div className="flex space-x-3 mt-6">
+              <div className="flex space-x-3 p-6 border-t flex-shrink-0 bg-gray-50">
                 <button
                   type="button"
                   onClick={fecharModal}
