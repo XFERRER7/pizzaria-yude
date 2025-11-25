@@ -1,34 +1,33 @@
-import React from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { PizzariaProvider } from './contexts/PizzariaContext';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Pizzas from './pages/Pizzas';
+import Pedidos from './pages/Pedidos';
+import Cardapio from './pages/Cardapio';
+import Estoque from './pages/Estoque';
+import Historico from './pages/Historico';
+import Relatorio from './pages/Relatorio';
+import Busca from './pages/Busca';
 
 function App() {
   return (
-    <div className="gradient-bg flex min-h-screen items-center justify-center from-blue-500 to-purple-600 p-8">
-      <div className="max-w-xl transform rounded-lg bg-white p-8 shadow-lg transition duration-500 hover:scale-105">
-        <h1 className="mb-4 animate-bounce text-center text-4xl font-bold text-gray-800">
-          Hello World
-        </h1>
-        <p className="mb-6 rounded-md bg-amber-100 p-6 text-gray-600">
-          Welcome to our React application enhanced with Tailwind CSS. This
-          application is built using the modern web development stack: Vite,
-          React, Tailwind CSS, and Prettier.
-        </p>
-        <div className="prose mt-6">
-          <p>
-            Tailwind CSS is a utility-first CSS framework that provides
-            low-level utility classes to build custom designs without any
-            annoying opinionated styles you have to fight to override. Paired
-            with React, it makes building beautiful and interactive user
-            interfaces a breeze.
-          </p>
-          <p>
-            Explore the power of combining these technologies to create
-            stunning, responsive, and animated web applications. Enjoy the
-            seamless development experience with Prettier ensuring your code
-            stays clean and consistent.
-          </p>
-        </div>
-      </div>
-    </div>
+    <PizzariaProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/pizzas" element={<Pizzas />} />
+            <Route path="/pedidos" element={<Pedidos />} />
+            <Route path="/cardapio" element={<Cardapio />} />
+            <Route path="/estoque" element={<Estoque />} />
+            <Route path="/historico" element={<Historico />} />
+            <Route path="/relatorio" element={<Relatorio />} />
+            <Route path="/busca" element={<Busca />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </PizzariaProvider>
   );
 }
 
