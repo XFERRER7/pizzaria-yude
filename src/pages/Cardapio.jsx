@@ -1,10 +1,21 @@
 import { usePizzaria } from '../contexts/PizzariaContext';
-import { Pizza } from 'lucide-react';
+import { Pizza, Server } from 'lucide-react';
 
 const Cardapio = () => {
-  const { pizzas } = usePizzaria();
+  const { pizzas, carregandoPizzas } = usePizzaria();
 
   const pizzasDisponiveis = pizzas.filter(p => p.disponivel);
+
+  if (carregandoPizzas) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Carregando cardápio...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -28,9 +39,17 @@ const Cardapio = () => {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-2xl font-bold text-gray-800">{pizza.nome}</h3>
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {pizza.tamanho}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                      {pizza.tamanho}
+                    </span>
+                    {pizza.origem === 'servidor' && (
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center gap-1">
+                        <Server size={12} />
+                        Servidor
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                   {pizza.ingredientes}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { usePizzaria } from '../contexts/PizzariaContext';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, AlertCircle, Pizza } from 'lucide-react';
 
 const Pizzas = () => {
   const { pizzas, adicionarPizza, editarPizza, deletarPizza } = usePizzaria();
@@ -81,6 +81,20 @@ const Pizzas = () => {
         </button>
       </div>
 
+      {/* Banner informativo */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+        <div className="flex items-center">
+          <Pizza className="text-blue-500 mr-3" size={24} />
+          <div>
+            <h3 className="text-blue-800 font-bold">Pizzas Originais</h3>
+            <p className="text-blue-700 text-sm">
+              Pizzas marcadas com <AlertCircle className="inline" size={14} /> são originais da casa 
+              não podem ser editadas ou excluídas.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Lista de Pizzas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {pizzas.length === 0 ? (
@@ -94,7 +108,15 @@ const Pizzas = () => {
               className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-bold text-gray-800">{pizza.nome}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-gray-800">{pizza.nome}</h3>
+                  {pizza.origem === 'servidor' && (
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded flex items-center gap-1">
+                      <Pizza size={12} />
+                      Original
+                    </span>
+                  )}
+                </div>
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${
                     pizza.disponivel
@@ -114,22 +136,28 @@ const Pizzas = () => {
               <p className="text-2xl font-bold text-red-600 mb-4">
                 R$ {pizza.preco.toFixed(2)}
               </p>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => abrirModal(pizza)}
-                  className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-600 transition"
-                >
-                  <Edit2 size={16} />
-                  <span>Editar</span>
-                </button>
-                <button
-                  onClick={() => handleDelete(pizza.id)}
-                  className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-600 transition"
-                >
-                  <Trash2 size={16} />
-                  <span>Deletar</span>
-                </button>
-              </div>
+              {pizza.origem === 'servidor' ? (
+                <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-center text-sm">
+                  Pizza original da casa (somente leitura)
+                </div>
+              ) : (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => abrirModal(pizza)}
+                    className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-600 transition"
+                  >
+                    <Edit2 size={16} />
+                    <span>Editar</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(pizza.id)}
+                    className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-600 transition"
+                  >
+                    <Trash2 size={16} />
+                    <span>Deletar</span>
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
